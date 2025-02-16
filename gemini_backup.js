@@ -4,8 +4,6 @@ import dotenv from 'dotenv';
 // import * as readline from 'node:readline/promises';
 // import { stdin as input, stdout as output } from 'node:process';
 
-
-
 // Initialize the API
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -72,8 +70,9 @@ async function compareProfiles(potential_match_profile) {
 
             Strict Rules:
             - If any of the user preferences are labeled "None" or are empty, ignore that category.
-            - If the profile contains any of the deal breakers, swipe left. Unless physical characteristics are deal breakers, weigh physical descriptors less heavily.
+            - If the profile contains any of the deal breakers, swipe left. 
             - if the profile is distinctly outside of the specified age preference or location preference, swipe left. 
+            - Unless physical characteristics are deal breakers, weigh physical descriptors less heavily.
             `
         ]);
 
@@ -157,8 +156,8 @@ async function analyzeProfile(imagePath) {
     console.log("Extracted Text:", extractedText);
 
     // Combine bio with all image descriptions for comparison
-    const fullProfile = extractedText.bio + "\n" + extractedText.image_descriptions.join("\n");
-    const decision = await compareProfiles(fullProfile);
+    // const fullProfile = extractedText.bio + "\n" + extractedText.image_descriptions.join("\n");
+    const decision = await compareProfiles(extractedText);
     console.log("Verdict:", decision);
     return decision;
     
