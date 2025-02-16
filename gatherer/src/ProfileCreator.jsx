@@ -2,8 +2,8 @@ import { useState } from "react";
 
 const questions = [
   "What's your username?",
-  "What are you looking for in a match?",
-  "What are your deal breakers?",
+  "What are you looking for in a match? (green flags)",
+  "What are your deal breakers? (red flags)",
   "What are your interests/hobbies?",
 ];
 
