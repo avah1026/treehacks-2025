@@ -80,7 +80,7 @@ const ProfileCreator = () => {
     //     console.log(responses)
     // }
 
-    const [data, setData] = useState({ key: "value" });
+    // const [data, setData] = useState({ key: "value" });
   
     const sendData = async () => {
       try {
@@ -89,11 +89,11 @@ const ProfileCreator = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(responses),
         });
   
-        const result = await response.json();
-        console.log("Response:", result);
+        // const result = await response.json();
+        // console.log("Response:", result);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -134,6 +134,7 @@ const ProfileCreator = () => {
                ) : (
                 <>
                 <textarea 
+                    autoComplete="off"
                     className="text-input"
                     value={currentInput}
                     onChange={(e) => setCurrentInput(e.target.value)}

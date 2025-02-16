@@ -2,14 +2,19 @@ package tech.pacia.tinderswiper
 
 import dadb.Dadb
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import maestro.Maestro
 import maestro.drivers.AndroidDriver
 import okio.Buffer
@@ -19,19 +24,37 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
-import kotlin.random.Random
+
+private val json = Json { ignoreUnknownKeys = true }
 
 private lateinit var maestro: Maestro
 private lateinit var gemini: Gemini
+private var myOwnPreferences: MyOwnPreferences? = null
 
 fun main() = runBlocking {
     val geminiApiKey = System.getenv("GEMINI_API_KEY") ?: throw IllegalStateException("GEMINI_API_KEY not set")
     gemini = Gemini(apiKey = geminiApiKey)
 
     val server = embeddedServer(CIO, 8080) {
+        install(CORS) {
+            anyHost() // Allows requests from any origin
+            allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.Authorization)
+            allowCredentials = true
+            allowNonSimpleContentTypes = true
+            allowSameOrigin = true
+            anyMethod() // Allows all HTTP methods
+        }
+
         routing {
             post("/my-data") {
-                call.respondText("You submitted data!", contentType = ContentType.Text.Plain)
+                val jsonStr = call.receiveText()
+                myOwnPreferences = json.decodeFromString<MyOwnPreferences>(jsonStr)
+
+                log("Received data! MyOwnPreferences: $myOwnPreferences")
+
+                val responseJSON = "\"msg\": \"You submitted data!\""
+                call.respondText(responseJSON, contentType = ContentType.Application.Json)
             }
         }
     }
@@ -40,9 +63,15 @@ fun main() = runBlocking {
         server.startSuspend(wait = false)
     }
 
+    while (myOwnPreferences == null) {
+        log("Did not receive user's preferences yet, waiting for it...")
+        delay(1000)
+    }
+
+    log("Received user's preferences! Will start the main loop.")
     mainLoop()
-    log("main loop done")
-    serverJob.cancel(CancellationException("Main loop finished, server has no purpose to live anymore"))
+    log("Main loop done!")
+    serverJob.cancel(CancellationException("Main loop is done, server has no purpose to live anymore"))
 }
 
 private suspend fun mainLoop() {
@@ -73,16 +102,18 @@ private suspend fun mainLoop() {
     delay(timeMillis = 3000L)
     log("done waiting for 3s!")
 
-    // val bufferDATA = screenshot("profile_1.png")
-    // responsejson = http.post(systemPrompt+bufferDATA)
+    var i = 0 // TODO: Loop infinitely until the "you're out of likes" message appears
+    while (i < 1) {
+        // TODO: Loop over all images in one's profile
+        val imageBuffer = screenshot("profile_${i}.png")
 
-    var i = 0 // TODO: do this in a loop unless "you're out of likes" message appears
-    while (i < 3) {
-        val buffer = screenshot("profile_${i}.png")
-
-        // gemini.analyzeProfile()
-
-        val like = Random.nextBoolean() // TODO: replace with a call to the Gemini API
+        val verdict = gemini.analyzeProfile(
+            myOwnPrefs = myOwnPreferences!!,
+            images = listOf(/*imageBuffer*/),
+        )
+        val like = verdict == 1
+        // val verdict = Random.nextBoolean() // TODO: replace with a call to the Gemini API
+        log("Send a like? $like")
         if (like) {
             yay()
         } else {

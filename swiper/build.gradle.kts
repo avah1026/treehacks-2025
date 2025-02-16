@@ -32,6 +32,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
     // implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("io.ktor:ktor-server-cors:3.1.0")
     implementation("dev.shreyaspatil.generativeai:generativeai-google:0.9.0-1.0.1")
     // implementation("com.google.generativeai:generativeai:0.1.1")
 
