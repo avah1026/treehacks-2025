@@ -15,6 +15,7 @@
   "license": "Apache-2.0",
   "description": "The Complete Intro to React v9, as taught by Brian Holt for Frontend Masters",
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
     "@vitejs/plugin-react": "4.3.1",
     "eslint": "9.9.1",
     "eslint-config-prettier": "9.1.0",
