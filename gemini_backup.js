@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-
+/*
 async function extractFromImage(imagePath) {
   try {
     // Load the image file and convert to base64
@@ -16,7 +16,7 @@ async function extractFromImage(imagePath) {
     const base64Image = imageBuffer.toString("base64");
 
     // Initialize the model - 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite-preview-02-05" });
 
     // Prepare the image data
     const imagePart = {
@@ -44,6 +44,7 @@ async function extractFromImage(imagePath) {
     throw error;
   }
 }
+*/
 
 async function compareProfiles(potential_match_profile) {
     try {
@@ -64,9 +65,9 @@ async function compareProfiles(potential_match_profile) {
             Age preference: ${user_prefs.age_range}
             Location preference: ${user_prefs.location_preference}
 
-            Profile to analyze: ${potential_match_profile}
+            Profile to analyze: "Bio:  ${potential_match_profile.bio} and Image Descriptions: ${potential_match_profile.image_description}." 
 
-            Determine the profile's compatibility with the user's preferences, and so whether the user should "Swipe Right" or "Swipe Left". Provide a breif explanation of why.
+            Determine the profile's compatibility with the user's preferences, and so whether the user should "Swipe Right" or "Swipe Left". Provide a brief explanation of why.
 
             Strict Rules:
             - If any of the user preferences are labeled "None" or are empty, ignore that category.
@@ -78,6 +79,7 @@ async function compareProfiles(potential_match_profile) {
 
         const analysis = response.response.text();
         return analysis.toLowerCase().includes('right') ? 1 : 0;
+        //return analysis;
     } catch (error) {
         if (error.code === 'ENOENT') {
             console.error("Error: user_preferences.json not found");
@@ -96,7 +98,7 @@ async function extractFromImages(imagePaths) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
     const bio_result = await model.generateContent([
-      "Extract the written biography from the profile image, as well as the interest tags if they are present. Return only the text, no explanations.",
+      "Extract the written biography from the profile image, as well as the interest tags and age if they are present. Return only the text, no explanations.",
       {
         inlineData: {
           data: firstBase64Image,
@@ -112,7 +114,7 @@ async function extractFromImages(imagePaths) {
       const base64Image = imageBuffer.toString("base64");
       
       const image_description_result = await model.generateContent([
-        "Describe notable physical characteristics (e.g. hair color, height) and environmental features (e.g. background, clothing, etc.). Describe the activities being done in the photo, or any key qualities implied by the photo. Return only the descriptions, no explanations.",
+        "Extract notable physical characteristics (e.g. hair color, height) and environmental features (e.g. background). Describe the activities being done in the photo, or any key qualities of the photo. Return only the descriptions, no explanations.",
         {
           inlineData: {
             data: base64Image,
