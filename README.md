@@ -1,6 +1,6 @@
 # Gemini Usage
 
-gemini_backup.js contains implementation of Gemini 1.5 Flash to extract text and image details relevant to dating profile. It requires: 
+gemini_backup.js contains implementation of Gemini Flash 2.0 to extract text and image details relevant to dating profile. It requires: 
 
 A) user_preferences.json file to be present in the root directory; this file contains the user's preferences that will determine whether a profile is a match. (Assumption is that this json will be generated after the user completes the "HeartHacks" questionnaire.)
 
