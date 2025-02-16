@@ -1,4 +1,4 @@
-# Gemini Usage
+# Usage
 
 gemini_backup.js contains implementation of Gemini Flash 2.0 to extract text and image details relevant to dating profile. It requires: 
 
