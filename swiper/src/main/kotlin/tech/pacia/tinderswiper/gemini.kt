@@ -101,7 +101,7 @@ class Gemini(private val apiKey: String) {
 
     private suspend fun callGeminiAPI(prompt: String): String {
         val model = GenerativeModel(
-            modelName = "gemini-pro",
+            modelName = "gemini-2.0-flash",
             apiKey = apiKey,
         )
 
@@ -111,7 +111,7 @@ class Gemini(private val apiKey: String) {
 
     private suspend fun callGeminiAPI(image: Buffer?, prompt: String): String {
         val model = GenerativeModel(
-            modelName = "gemini-pro-vision",
+            modelName = "gemini-2.0-flash",
             apiKey = apiKey,
         )
 

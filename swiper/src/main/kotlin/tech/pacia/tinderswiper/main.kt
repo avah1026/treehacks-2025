@@ -3,6 +3,7 @@ package tech.pacia.tinderswiper
 import dadb.Dadb
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
@@ -18,9 +19,6 @@ import kotlinx.serialization.json.Json
 import maestro.Maestro
 import maestro.drivers.AndroidDriver
 import okio.Buffer
-import okio.FileSystem
-import okio.Path.Companion.toOkioPath
-import java.io.File
 import java.io.IOException
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
@@ -43,7 +41,7 @@ fun main() = runBlocking {
             allowCredentials = true
             allowNonSimpleContentTypes = true
             allowSameOrigin = true
-            anyMethod() // Allows all HTTP methods
+            // anyMethod() // Allows all HTTP methods
         }
 
         routing {
@@ -60,7 +58,7 @@ fun main() = runBlocking {
     }
 
     val serverJob = launch {
-        server.startSuspend(wait = false)
+        server.start(wait = false)
     }
 
     while (myOwnPreferences == null) {
@@ -103,16 +101,15 @@ private suspend fun mainLoop() {
     log("done waiting for 3s!")
 
     var i = 0 // TODO: Loop infinitely until the "you're out of likes" message appears
-    while (i < 1) {
+    while (i < 3) {
         // TODO: Loop over all images in one's profile
-        val imageBuffer = screenshot("profile_${i}.png")
+        val imageBuffer = screenshot()
 
         val verdict = gemini.analyzeProfile(
             myOwnPrefs = myOwnPreferences!!,
-            images = listOf(/*imageBuffer*/),
+            images = listOf(imageBuffer),
         )
-        val like = verdict == 1
-        // val verdict = Random.nextBoolean() // TODO: replace with a call to the Gemini API
+        val like = verdict == 1 /* Random.nextBoolean() */
         log("Send a like? $like")
         if (like) {
             yay()
@@ -128,19 +125,16 @@ private suspend fun mainLoop() {
     maestro.close()
 }
 
-private suspend fun screenshot(filename: String): Buffer {
-    log("will take a screenshot to file $filename")
+private suspend fun screenshot(): Buffer {
+    log("will take a screenshot")
 
     val buffer = Buffer()
     maestro.takeScreenshot(buffer, false)
-    val retBuffer = buffer.copy()
 
-    val path2 = File(filename).toOkioPath()
-    FileSystem.SYSTEM.write(path2) { writeAll(buffer) }
-    log("took and wrote screenshot to file $filename, now will wait 1s")
+    log("took screenshot, now will wait 1s")
     delay(timeMillis = 1000L)
 
-    return retBuffer
+    return buffer
 }
 
 private suspend fun yay() {
