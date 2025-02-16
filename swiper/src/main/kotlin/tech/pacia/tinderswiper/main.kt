@@ -100,14 +100,20 @@ private suspend fun mainLoop() {
     delay(timeMillis = 3000L)
     log("done waiting for 3s!")
 
-    var i = 0 // TODO: Loop infinitely until the "you're out of likes" message appears
-    while (i < 3) {
-        // TODO: Loop over all images in one's profile
-        val imageBuffer = screenshot()
+    var currentProfileIndex = 0 // TODO: Loop infinitely until the "you're out of likes" message appears
+    val profilesToSee = 10
+    (0..<profilesToSee).forEach { profileIndex ->
+        val photos = mutableListOf<Buffer>()
+        (0..<3).forEach { i ->
+            // TODO: Loop over all images in one's profile, not just 3
+            val imageBuffer = screenshot()
+            photos.add(imageBuffer)
+            nextPic()
+        }
 
         val verdict = gemini.analyzeProfile(
             myOwnPrefs = myOwnPreferences!!,
-            images = listOf(imageBuffer),
+            images = photos,
         )
         val like = verdict == 1 /* Random.nextBoolean() */
         log("Send a like? $like")
@@ -116,8 +122,6 @@ private suspend fun mainLoop() {
         } else {
             nay()
         }
-
-        i++
     }
 
     log("before close???")
@@ -125,14 +129,11 @@ private suspend fun mainLoop() {
     maestro.close()
 }
 
-private suspend fun screenshot(): Buffer {
+private fun screenshot(): Buffer {
     log("will take a screenshot")
 
     val buffer = Buffer()
     maestro.takeScreenshot(buffer, false)
-
-    log("took screenshot, now will wait 1s")
-    delay(timeMillis = 1000L)
 
     return buffer
 }
@@ -150,6 +151,13 @@ private suspend fun nay() {
     maestro.swipe(startRelative = "80%,50%", endRelative = "20%,50%", duration = 1000)
 
     log("swiped left, now will wait 1s")
+    delay(timeMillis = 1000L)
+}
+
+private suspend fun nextPic() {
+    log("will tap to see the next pic")
+    maestro.tapOnRelative(percentX = 80, percentY = 50, retryIfNoChange = false)
+
     delay(timeMillis = 1000L)
 }
 

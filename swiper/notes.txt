@@ -2,3 +2,12 @@
 # execute individual commands
     # small timeout between them
 # profit?
+
+
+Example green flags:
+- tall pretty girl
+- doesn't have social media handles in bio
+
+
+Red flags:
+- social media handles in bio (including "masked" ones, usually starting with a "@")
