@@ -1,4 +1,4 @@
-package tech.pacia
+package tech.pacia.tinderswiper
 
 import dadb.Dadb
 import io.ktor.http.ContentType
@@ -21,9 +21,13 @@ import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeoutException
 import kotlin.random.Random
 
-var submitted = false
+private lateinit var maestro: Maestro
+private lateinit var gemini: Gemini
 
 fun main() = runBlocking {
+    val geminiApiKey = System.getenv("GEMINI_API_KEY") ?: throw IllegalStateException("GEMINI_API_KEY not set")
+    gemini = Gemini(apiKey = geminiApiKey)
+
     val server = embeddedServer(CIO, 8080) {
         routing {
             post("/my-data") {
@@ -40,8 +44,6 @@ fun main() = runBlocking {
     log("main loop done")
     serverJob.cancel(CancellationException("Main loop finished, server has no purpose to live anymore"))
 }
-
-private lateinit var maestro: Maestro
 
 private suspend fun mainLoop() {
     log("launching...")
@@ -77,6 +79,9 @@ private suspend fun mainLoop() {
     var i = 0 // TODO: do this in a loop unless "you're out of likes" message appears
     while (i < 3) {
         val buffer = screenshot("profile_${i}.png")
+
+        // gemini.analyzeProfile()
+
         val like = Random.nextBoolean() // TODO: replace with a call to the Gemini API
         if (like) {
             yay()
