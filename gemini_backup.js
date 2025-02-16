@@ -56,7 +56,7 @@ async function compareProfiles(potential_match_profile) {
 
         const response = await model.generateContent([
             `
-            Analyze this dating profile screenshot and determine compatibility based on these preferences:
+            Analyze this dating profile and determine compatibility based on these preferences:
 
             Looking for: ${user_prefs.looking_for.join(', ')}
             Deal breakers: ${user_prefs.deal_breakers.join(', ')}
@@ -66,7 +66,7 @@ async function compareProfiles(potential_match_profile) {
 
             Profile to analyze: ${potential_match_profile}
 
-            Determine the profile's compatibility with the user's preferences, and thus determine whether the user should "Swipe Right" or "Swipe Left". Provide a breif explanation of why.
+            Determine the profile's compatibility with the user's preferences, and so whether the user should "Swipe Right" or "Swipe Left". Provide a breif explanation of why.
 
             Strict Rules:
             - If any of the user preferences are labeled "None" or are empty, ignore that category.
