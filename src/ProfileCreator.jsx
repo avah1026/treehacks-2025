@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+// import { useState } from "react";
 
+
+   
 const ProfileCreator = () => {
     const [currentSection, setCurrentSection] = useState(0);
     const [responses, setResponses] = useState({
@@ -77,6 +80,33 @@ const ProfileCreator = () => {
     //     console.log(responses)
     // }
 
+    const [data, setData] = useState({ key: "value" });
+  
+    const sendData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/my-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+  
+        const result = await response.json();
+        console.log("Response:", result);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+  
+    // return (
+    //   <div>
+    //     <button onClick={sendData}>Send Data</button>
+    //   </div>
+    // );
+  
+
+
     return (
         <div className="container">
             <div className="profile-card">
@@ -139,9 +169,9 @@ const ProfileCreator = () => {
                     )}
                    <button 
                         className="button" 
-                        onClick={currentSection == 4 ? handleContinue: handleNext}
+                        onClick={currentSection == 4 ? sendData : handleNext}
                     >
-                        {currentSection === 4 ? 'Continue' : 'Next'}
+                        {currentSection === 4 ? 'Send Data' : 'Next'}
                     </button>
                     {currentSection > 0 && (
                     <button className="button" onClick={handlePrevious}> 
