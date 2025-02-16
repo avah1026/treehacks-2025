@@ -1,0 +1,4 @@
+# create Maestro instance, connect to device
+# execute individual commands
+    # small timeout between them
+# profit?
