@@ -53,7 +53,7 @@ async function compareProfiles(potential_match_profile) {
         // Get the first user's preferences (assuming single user for now)
         const user_prefs = preferences_file[Object.keys(preferences_file)[0]];
         
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const response = await model.generateContent([
             `
@@ -95,7 +95,7 @@ async function extractFromImages(imagePaths) {
     // Extract bio from the first image only
     const firstImageBuffer = await fs.readFile(imagePaths[0]);
     const firstBase64Image = firstImageBuffer.toString("base64");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     const bio_result = await model.generateContent([
       "Extract the written biography from the profile image, as well as the interest tags and age if they are present. Return only the text, no explanations.",
