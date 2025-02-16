@@ -10,7 +10,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function extractTextFromImage(imagePath) {
+
+async function extractFromImage(imagePath) {
   try {
     // Load the image file and convert to base64
     const imageBuffer = await fs.readFile(imagePath);
@@ -88,14 +89,76 @@ async function compareProfiles(potential_match_profile) {
     }
 }
 
+async function extractFromImages(imagePaths) {
+  try {
+    // Extract bio from the first image only
+    const firstImageBuffer = await fs.readFile(imagePaths[0]);
+    const firstBase64Image = firstImageBuffer.toString("base64");
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const bio_result = await model.generateContent([
+      "Extract the written biography from the profile image, as well as the interest tags if they are present. Return only the text, no explanations.",
+      {
+        inlineData: {
+          data: firstBase64Image,
+          mimeType: "image/png"
+        }
+      }
+    ]);
+    const bio = await bio_result.response;
 
-// Modify main function to accept imagePath parameter
+    // Process all images for physical descriptions
+    const descriptions = await Promise.all(imagePaths.map(async (imagePath) => {
+      const imageBuffer = await fs.readFile(imagePath);
+      const base64Image = imageBuffer.toString("base64");
+      
+      const image_description_result = await model.generateContent([
+        "Describe notable physical characteristics (e.g. hair color, height) and environmental features (e.g. background, clothing, etc.). Describe the activities being done in the photo, or any key qualities implied by the photo. Return only the descriptions, no explanations.",
+        {
+          inlineData: {
+            data: base64Image,
+            mimeType: "image/png"
+          }
+        }
+      ]);
+      return image_description_result.response.text();
+    }));
+
+    return {
+      bio: bio.text(),
+      image_descriptions: descriptions,
+    };
+  } catch (error) {
+    console.error("Error extracting text from images:", error);
+    throw error;
+  }
+}
+
+// Modify analyzeProfile to handle directory
 async function analyzeProfile(imagePath) {
   try {
-    const extractedText = await extractTextFromImage(imagePath);
+    let imagePaths;
+    const stats = await fs.stat(imagePath);
+    
+    if (stats.isDirectory()) {
+      const files = await fs.readdir(imagePath);
+      imagePaths = files
+        .filter(file => file.match(/\.(jpg|jpeg|png)$/i))
+        .map(file => `${imagePath}/${file}`);
+    } else {
+      imagePaths = [imagePath];
+    }
+
+    if (imagePaths.length === 0) {
+      throw new Error("No valid images found in directory");
+    }
+
+    const extractedText = await extractFromImages(imagePaths);
     console.log("Extracted Text:", extractedText);
 
-    const decision = await compareProfiles(extractedText.bio+extractedText.image_description);
+    // Combine bio with all image descriptions for comparison
+    const fullProfile = extractedText.bio + "\n" + extractedText.image_descriptions.join("\n");
+    const decision = await compareProfiles(fullProfile);
     console.log("Verdict:", decision);
     return decision;
     
